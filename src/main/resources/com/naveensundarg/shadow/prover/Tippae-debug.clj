@@ -1,48 +1,16 @@
-
-{
-:name Test-1
-:assumptions
-  {
-  A1   (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-            (= (TwoByOneMult ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-                (+
-                    (MultiplicandOnesDigitTimesMultiplierOnesDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-                    (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
-                )
-            )
-        )
-
-  }
-
-
-:goal  (=
-            (TwoByOneMult 1 5 5)
-            (+
-                (MultiplicandOnesDigitTimesMultiplierOnesDigit 5 5)
-                (MultiplicandTensDigitTimesMultiplierOnesDigit 1 5)
-            )
-        )
-}
-
 {
 :name Test-ValidityInheritance-with-ChoiceList
 :assumptions
   {
+;; The A1-# assertions define three different top level paths to multiple two digit number by one digit numbers.
+;; The ones with Err in their name are meant to represent paths that include wrong options.
+;; Note: the plus sign, "+" automatically transforms into "$$sum" in the proofs and solution
 
   A1   (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (=  (TwoByOneMult ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
               (+
                   (MultiplicandOnesDigitTimesMultiplierOnesDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
                   (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
-              )
-          )
-       )
-
-  A1-c (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (= (TwoByOneMultCalc ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-              ($$sum
-                  (MultiplicandOnesDigitTimesMultiplierOnesDigitCalc ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-                  (MultiplicandTensDigitTimesMultiplierOnesDigitCalc ?MultiplicandTensDigit ?MultiplierOnesDigit)
               )
           )
        )
@@ -56,15 +24,6 @@
           )
        )
 
-  A1-2c(forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (= (TwoByOneMultErr1Calc ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-              ($$sum
-                  (MultiplicandTensDigitTimesMultiplicandOnesDigitCalc ?MultiplicandTensDigit ?MultiplicandOnesDigit)
-                  (MultiplicandTensDigitTimesMultiplierOnesDigitCalc ?MultiplicandTensDigit ?MultiplierOnesDigit)
-              )
-          )
-       )
-
   A1-3 (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (= (TwoByOneMultErr2 ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
               (+
@@ -74,14 +33,7 @@
           )
        )
 
-  A1-3c(forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (= (TwoByOneMultErr2Calc ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-              ($$sum
-                  (MultiplicandOnesDigitTimesMultiplierOnesDigitCalc ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-                  (MultiplicandTensDigitTimesMultiplicandOnesDigitCalc ?MultiplicandTensDigit ?MultiplicandOnesDigit)
-              )
-          )
-       )
+;; A2-4 are currently not being used for anything.
 
   A2  (forall (?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (Define
@@ -90,26 +42,12 @@
           )
       )
 
-  A2-c (forall (?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (=
-              (MultiplicandOnesDigitTimesMultiplierOnesDigitCalc ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-              ($$product ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          )
-       )
-
   A3  (forall (?MultiplicandTensDigit ?MultiplierOnesDigit)
           (Define
               (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
               (* (* ?MultiplicandTensDigit 10) ?MultiplierOnesDigit)
           )
       )
-
-  A3-c (forall (?MultiplicandTensDigit ?MultiplierOnesDigit)
-          (=
-              (MultiplicandTensDigitTimesMultiplierOnesDigitCalc ?MultiplicandTensDigit ?MultiplierOnesDigit)
-              ($$product ($$product ?MultiplicandTensDigit 10 ) ?MultiplierOnesDigit)
-          )
-       )
 
   A4  (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit)
           (Define
@@ -118,12 +56,10 @@
           )
       )
 
-  A4-c(forall (?MultiplicandTensDigit ?MultiplicandOnesDigit)
-          (=
-              (MultiplicandTensDigitTimesMultiplicandOnesDigitCalc ?MultiplicandTensDigit ?MultiplicandOnesDigit)
-              ($$product ?MultiplicandTensDigit ?MultiplicandOnesDigit)
-          )
-      )
+;; A5-8 are assertions meant to represent the correctness of lowest level steps. The general reasoning below is
+;; that Validity can either be valid or invalid, e.g. (Validity ?x valid) or (Validity ?x invalid). The first part
+;; of these statements simply states that the part is correct, the second part allows for the base statement to be
+;; replaced by the assertion of its validity or invalidity.
 
   A5  (forall (?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (and
@@ -189,6 +125,10 @@
           )
       )
 
+;; A9-# and 10-# are assertions meant to allow for validity to be tracked through the combination of the individual
+;; part's own validity. Intuitively, a combination of adding or multiplying two steps is only valid if both steps
+;; are also valid.
+
   A9  (forall (?AddedStep1 ?AddedStep2)
           (Validity
               (+ (Validity ?AddedStep1 Valid) (Validity ?AddedStep2 Valid) )
@@ -245,7 +185,8 @@
           )
       )
 
-
+;; A11-13 are assertions meant to represent when an option has problem has several potential paths. I'm essentially
+;; using it to allow me to have several potential answers for queries.
 
   A11   (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (Optionally
@@ -269,6 +210,8 @@
        )
 
   }
+
+
 
  :answer-variables [?x]
 
