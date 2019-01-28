@@ -9,6 +9,8 @@ import com.naveensundarg.shadow.prover.representations.value.Variable;
 import com.naveensundarg.shadow.prover.utils.*;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.*;
 
 import static us.bpsm.edn.Keyword.newKeyword;
@@ -39,7 +41,7 @@ public class TippaeSandbox {
 
 
 
-        }else {
+        }else if(true){
 
             List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
 
@@ -83,6 +85,12 @@ public class TippaeSandbox {
                 }
 
             }
+        }else{
+            File outputFile = new File(TippaeSandbox.class.getResource("../GeneratedTippaeDebug.clj").getPath());
+            PrintWriter writer = new PrintWriter(outputFile);
+
+            writer.flush();
+            writer.close();
         }
     }
 
