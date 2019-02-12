@@ -8,7 +8,7 @@
 ;; along with stating that it is fine to directly replace those steps with their broken down versions.
 
   A1   (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (=  (TwoByOneMult ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
+          (Define  (TwoByOneMult ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
               (Addition
                   (MultiplicandOnesDigitTimesMultiplierOnesDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
                   (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
@@ -17,7 +17,7 @@
        )
 
   A1-2 (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (= (TwoByOneMultErr1 ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
+          (Define (TwoByOneMultErr1 ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
               (Addition
                   (MultiplicandTensDigitTimesMultiplicandOnesDigit ?MultiplicandTensDigit ?MultiplicandOnesDigit)
                   (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
@@ -26,7 +26,7 @@
        )
 
   A1-3 (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-          (= (TwoByOneMultErr2 ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
+          (Define (TwoByOneMultErr2 ?MultiplicandTensDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
               (Addition
                   (MultiplicandOnesDigitTimesMultiplierOnesDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
                   (MultiplicandTensDigitTimesMultiplicandOnesDigit ?MultiplicandTensDigit ?MultiplicandOnesDigit)
@@ -39,21 +39,21 @@
   A2  (forall (?MultiplicandOnesDigit ?MultiplierOnesDigit)
           (Define
               (MultiplicandOnesDigitTimesMultiplierOnesDigit ?MultiplicandOnesDigit ?MultiplierOnesDigit)
-              (Optionally (OneByOneMultAttempt ?MultiplicandOnesDigit ?MultiplierOnesDigit) ?Choice)
+              (Multiplication ?MultiplicandOnesDigit ?MultiplierOnesDigit)
           )
       )
 
   A3  (forall (?MultiplicandTensDigit ?MultiplierOnesDigit)
           (Define
               (MultiplicandTensDigitTimesMultiplierOnesDigit ?MultiplicandTensDigit ?MultiplierOnesDigit)
-              (* (* ?MultiplicandTensDigit 10) ?MultiplierOnesDigit)
+              (Multiplication (Multiplication ?MultiplicandTensDigit 10) ?MultiplierOnesDigit)
           )
       )
 
   A4  (forall (?MultiplicandTensDigit ?MultiplicandOnesDigit)
           (Define
               (MultiplicandTensDigitTimesMultiplicandOnesDigit ?MultiplicandTensDigit ?MultiplicandOnesDigit)
-              (* ?MultiplicandTensDigit ?MultiplicandOnesDigit)
+              (Multiplication ?MultiplicandTensDigit ?MultiplicandOnesDigit)
           )
       )
 

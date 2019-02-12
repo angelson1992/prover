@@ -41,7 +41,7 @@ public class TippaeSandbox {
 
 
 
-        }else if(true){
+        }else if(false){
 
             List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
 
@@ -86,11 +86,24 @@ public class TippaeSandbox {
 
             }
         }else{
-            File outputFile = new File(TippaeSandbox.class.getResource("../GeneratedTippaeDebug.clj").getPath());
-            PrintWriter writer = new PrintWriter(outputFile);
+//            File outputFile = new File(TippaeSandbox.class.getResource("../GeneratedTippaeDebug.clj").getPath());
+//            PrintWriter writer = new PrintWriter(outputFile);
+//
+//            writer.flush();
+//            writer.close();
 
-            writer.flush();
-            writer.close();
+            List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
+
+            Problem p = tests.get(0);
+
+            SnarkWrapperCustom snarkProver = SnarkWrapperCustom.getInstance();
+
+            Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = snarkProver.proveAndGetMultipleBindings(p.getAssumptions(), p.getGoal(), p.getAnswerVariables().get());
+
+            System.out.println(answer.get().getRight().iterator().next().entrySet().iterator().next().getValue().getArguments()[1].getName());
+
+
+
         }
     }
 
