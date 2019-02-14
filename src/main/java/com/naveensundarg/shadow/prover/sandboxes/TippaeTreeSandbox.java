@@ -8,6 +8,7 @@ import com.naveensundarg.shadow.prover.representations.value.Variable;
 import com.naveensundarg.shadow.prover.utils.CollectionUtils;
 import com.naveensundarg.shadow.prover.utils.Problem;
 import com.naveensundarg.shadow.prover.utils.ProblemReader;
+import com.naveensundarg.shadow.prover.utils.Reader;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -18,9 +19,9 @@ import java.util.stream.Collectors;
  */
 public class TippaeTreeSandbox {
 
-  public static void main(String[] args) throws Exception {
+  public void readResource(String fileLocation) throws Reader.ParsingException {
 
-    List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-Math-Truth.clj"));
+    List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream(fileLocation));
 
     Problem p = tests.get(0);
 
@@ -28,6 +29,8 @@ public class TippaeTreeSandbox {
 
     Set<Formula> assumedOptionallyBranches = CollectionUtils.newEmptySet();
     Set<Formula> assumedValidityDeclarations = CollectionUtils.newEmptySet();
+    Set<Formula> assumedDefinitionDeclarations = CollectionUtils.newEmptySet();
+
     Map<Value, Set<Value>> attemptToOptionsMap = CollectionUtils.newMap();
     Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
 
@@ -38,13 +41,15 @@ public class TippaeTreeSandbox {
       for (Formula subAssumption : assumption.subFormulae()) {
 
         if(assumption != subAssumption && subAssumption.toString().indexOf("Optionally") == 1) { //The if statement that find Optionally formula
-          //System.out.println("    " + subAssumption );
           assumedOptionallyBranches.add(subAssumption);
         }
 
         if(assumption != subAssumption && subAssumption.toString().indexOf("Validity") == 1 && subAssumption.toString().indexOf("Addition")==-1 && subAssumption.toString().indexOf("Multiplication")==-1) { //The if statement that find Validity formula
-          //System.out.println("    " + subAssumption );
           assumedValidityDeclarations.add(subAssumption);
+        }
+
+        if(assumption != subAssumption && subAssumption.toString().indexOf("Define") == 1){
+          assumedDefinitionDeclarations.add(subAssumption);
         }
 
       }
@@ -90,14 +95,32 @@ public class TippaeTreeSandbox {
 
     }
 
+    System.out.println("Definition Formula are: ");
+    for (Formula definition: assumedDefinitionDeclarations){
+      System.out.println("     " + definition);
+      String stringForm = definition.toString();
+      String firstName = stringForm.substring(9, stringForm.indexOf(" ", 9));
 
+      System.out.println("          " + stringForm.substring(9, stringForm.indexOf(" ", 9)));
+
+    }
 
     System.out.println("\n\n" + attemptToOptionsMap);
     System.out.println("\n" + OptionToValidityMap);
 
+
+
+
     //SnarkWrapperCustom snarkProver = SnarkWrapperCustom.getInstance();
     //Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = snarkProver.proveAndGetMultipleBindings(p.getAssumptions(), p.getGoal(), p.getAnswerVariables().get());
     //System.out.println(answer.get().getRight().iterator().next().entrySet().iterator().next().getValue().getArguments()[1].getName());
+
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    TippaeTreeSandbox testingEnvironment = new TippaeTreeSandbox();
+    testingEnvironment.readResource("../Tippae-Math-Truth.clj");
 
   }
 
