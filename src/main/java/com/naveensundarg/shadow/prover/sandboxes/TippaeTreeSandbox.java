@@ -101,8 +101,25 @@ public class TippaeTreeSandbox {
       String stringForm = definition.toString();
       String firstName = stringForm.substring(9, stringForm.indexOf(" ", 9));
 
-      System.out.println("          " + stringForm.substring(9, stringForm.indexOf(" ", 9)));
-
+      int clausesTraveled = 0;
+      int layersInward = 0;
+      int indexOfSecondName = 0;
+      for (int i = 5; i < stringForm.length(); i++){
+        if(stringForm.substring(i, i+1).equals("(")){
+          layersInward++;
+          if(clausesTraveled == 1 && layersInward == 1){
+            indexOfSecondName = i+1;
+          }
+        }else if(stringForm.substring(i, i+1).equals(")")){
+          layersInward--;
+          if(layersInward == 0){
+            clausesTraveled++;
+          }
+        }
+      }
+      String secondName = stringForm.substring(indexOfSecondName, stringForm.indexOf(" ", indexOfSecondName));
+      System.out.println("          " + definition.valuesPresent().stream().filter(def -> def.getName().equals(firstName)).collect(Collectors.toSet()));
+      System.out.println("          " + secondName);
     }
 
     System.out.println("\n\n" + attemptToOptionsMap);
