@@ -119,7 +119,7 @@ public class TippaeTreeSandbox {
       }
       String secondName = stringForm.substring(indexOfSecondName, stringForm.indexOf(" ", indexOfSecondName));
       System.out.println("          " + definition.valuesPresent().stream().filter(def -> def.getName().equals(firstName)).collect(Collectors.toSet()));
-      System.out.println("          " + secondName);
+      System.out.println("          " + definition.valuesPresent().stream().filter(def -> def.getName().equals(secondName)).collect(Collectors.toSet()));
     }
 
     System.out.println("\n\n" + attemptToOptionsMap);
