@@ -33,6 +33,7 @@ public class TippaeTreeSandbox {
 
     Map<Value, Set<Value>> attemptToOptionsMap = CollectionUtils.newMap();
     Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
+    Map<Value, Value> termToDefinitionMap = CollectionUtils.newMap();
 
     for (Formula assumption: assumptions) {
 
@@ -118,12 +119,16 @@ public class TippaeTreeSandbox {
         }
       }
       String secondName = stringForm.substring(indexOfSecondName, stringForm.indexOf(" ", indexOfSecondName));
-      System.out.println("          " + definition.valuesPresent().stream().filter(def -> def.getName().equals(firstName)).collect(Collectors.toSet()));
-      System.out.println("          " + definition.valuesPresent().stream().filter(def -> def.getName().equals(secondName)).collect(Collectors.toSet()));
+      Value termVal = definition.valuesPresent().stream().filter(def -> def.getName().equals(firstName)).collect(Collectors.toSet()).iterator().next();
+      Value defVal = definition.valuesPresent().stream().filter(def -> def.getName().equals(secondName)).collect(Collectors.toSet()).iterator().next();
+      System.out.println("          " + termVal);
+      System.out.println("          " + defVal);
+      termToDefinitionMap.put(termVal, defVal);
     }
 
     System.out.println("\n\n" + attemptToOptionsMap);
     System.out.println("\n" + OptionToValidityMap);
+    System.out.println("\n" + termToDefinitionMap);
 
 
 
