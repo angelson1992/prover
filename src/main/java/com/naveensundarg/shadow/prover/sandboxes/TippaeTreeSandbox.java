@@ -11,6 +11,7 @@ import com.naveensundarg.shadow.prover.utils.ProblemReader;
 import com.naveensundarg.shadow.prover.utils.Reader;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,11 @@ import java.util.stream.Collectors;
  * Created by John on 2/11/2019.
  */
 public class TippaeTreeSandbox {
+
+  private Map<Value, Set<Value>> attemptToOptionsMap = CollectionUtils.newMap();
+  private Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
+  private Map<Value, Value> termToDefinitionMap = CollectionUtils.newMap();
+  private DefaultMutableTreeNode mathStepsTreeRoot = new DefaultMutableTreeNode();
 
   public void readResource(String fileLocation) throws Reader.ParsingException {
 
@@ -30,10 +36,6 @@ public class TippaeTreeSandbox {
     Set<Formula> assumedOptionallyBranches = CollectionUtils.newEmptySet();
     Set<Formula> assumedValidityDeclarations = CollectionUtils.newEmptySet();
     Set<Formula> assumedDefinitionDeclarations = CollectionUtils.newEmptySet();
-
-    Map<Value, Set<Value>> attemptToOptionsMap = CollectionUtils.newMap();
-    Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
-    Map<Value, Value> termToDefinitionMap = CollectionUtils.newMap();
 
     for (Formula assumption: assumptions) {
 
@@ -139,10 +141,27 @@ public class TippaeTreeSandbox {
 
   }
 
+  public void constructStepsTree(){
+
+
+
+  }
+
+  public void insertStep(DefaultMutableTreeNode node){
+
+    if(!mathStepsTreeRoot.children().hasMoreElements()){
+      mathStepsTreeRoot.add(node);
+    }else if(mathStepsTreeRoot.isNodeAncestor(node)){
+      
+    }
+
+  }
+
   public static void main(String[] args) throws Exception {
 
     TippaeTreeSandbox testingEnvironment = new TippaeTreeSandbox();
     testingEnvironment.readResource("../Tippae-Math-Truth.clj");
+
 
   }
 
