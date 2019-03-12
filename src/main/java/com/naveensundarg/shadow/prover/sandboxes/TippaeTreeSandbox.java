@@ -1,5 +1,6 @@
 package com.naveensundarg.shadow.prover.sandboxes;
 
+import clojure.lang.IFn;
 import com.naveensundarg.shadow.prover.core.SnarkWrapperCustom;
 import com.naveensundarg.shadow.prover.core.proof.Justification;
 import com.naveensundarg.shadow.prover.representations.formula.Formula;
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
  * Created by John on 2/11/2019.
  */
 public class TippaeTreeSandbox {
+
+  public static String MULTIPLICATIONSYMBOL = "Multiplication";
+  public static String ADDITIONSYMBOL = "Addition";
 
   private Map<Value, Set<Value>> attemptToOptionsMap = CollectionUtils.newMap();
   private Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
@@ -130,7 +134,7 @@ public class TippaeTreeSandbox {
 
     System.out.println("\n\n" + attemptToOptionsMap);
     System.out.println("\n" + OptionToValidityMap);
-    System.out.println("\n" + termToDefinitionMap);
+    System.out.println("\n" + termToDefinitionMap + "\n\n");
 
 
 
@@ -143,16 +147,79 @@ public class TippaeTreeSandbox {
 
   public void constructStepsTree(){
 
+    for (Value key: termToDefinitionMap.keySet()){
+      DefaultMutableTreeNode termNode = new DefaultMutableTreeNode(key);
+      DefaultMutableTreeNode definitionNode = new DefaultMutableTreeNode(termToDefinitionMap.get(key));
 
+      insertStep(termNode, definitionNode);
+      addSubDefinitionSteps(definitionNode);
+
+    }
+
+    treePrinter(mathStepsTreeRoot);
 
   }
 
-  public void insertStep(DefaultMutableTreeNode node){
+  public void insertStep(DefaultMutableTreeNode tNode, DefaultMutableTreeNode dNode){
 
-    if(!mathStepsTreeRoot.children().hasMoreElements()){
-      mathStepsTreeRoot.add(node);
-    }else if(mathStepsTreeRoot.isNodeAncestor(node)){
-      
+    if(mathStepsTreeRoot.getChildCount() == 0){ //If the tree is empty
+      mathStepsTreeRoot.add(tNode); //Add the term node to the root
+      tNode.add(dNode); //And have the definition node be it's child
+    }else if(!mathStepsTreeRoot.isNodeAncestor(tNode) && !mathStepsTreeRoot.isNodeAncestor(dNode)){ //If the tree does not contain the term node or the definition node but is not empty
+      mathStepsTreeRoot.add(tNode); //Add the term node to the root
+      tNode.add(dNode); //And have the definition node be it's child
+    }else if(mathStepsTreeRoot.isNodeAncestor(tNode) && !mathStepsTreeRoot.isNodeAncestor(dNode)){ //if the tree does have the term node but not the definition node
+      tNode.add(dNode); //just add the definition as a child of the term
+    }else if(!mathStepsTreeRoot.isNodeAncestor(tNode) && mathStepsTreeRoot.isNodeAncestor(dNode)){ //if the tree does not that the term node but does have the definition node
+      DefaultMutableTreeNode parentalNode = (DefaultMutableTreeNode) dNode.getParent(); //insert the term node in between the definition node and it's parent node
+      parentalNode.add(tNode);
+      dNode.setParent(tNode);
+      tNode.add(dNode);
+    }
+
+  }
+
+  public DefaultMutableTreeNode findNodeByString(DefaultMutableTreeNode searchedFor){
+    Enumeration searchEnum = mathStepsTreeRoot.depthFirstEnumeration();
+    DefaultMutableTreeNode answerNode = null;
+    String targetString = searchedFor.toString();
+    while(answerNode == null && searchEnum.hasMoreElements()){
+      DefaultMutableTreeNode testedNode = (DefaultMutableTreeNode) searchEnum.nextElement();
+      String testedString = testedNode.toString();
+      if(targetString.equals(testedString)){
+        answerNode = testedNode;
+      }
+    }
+    return answerNode;
+  }
+
+  public void addSubDefinitionSteps(DefaultMutableTreeNode inputNode){
+    Value input = (Value) inputNode.getUserObject();
+    if(input != null && input.getArguments().length > 0) {
+      for (int i = 0; i < input.getArguments().length; i++){
+        if(input.getArguments()[i].getArguments().length>0) {
+          DefaultMutableTreeNode subDefNode = new DefaultMutableTreeNode(input.getArguments()[i]);
+          addSubDefinitionSteps(subDefNode);
+          insertStep(inputNode, subDefNode);
+          System.out.println("The node " + inputNode + "has been given child " + input.getArguments()[i]);
+          System.out.println("<<" + input.getArguments().length + ">>");
+        }
+      }
+
+
+    }
+  }
+
+  public void treePrinter(DefaultMutableTreeNode node){
+    Enumeration breathEnum = mathStepsTreeRoot.depthFirstEnumeration();
+
+    while(breathEnum.hasMoreElements()){
+      DefaultMutableTreeNode printedNode = (DefaultMutableTreeNode) breathEnum.nextElement();
+      String branch = "";
+      for(int i = mathStepsTreeRoot.getDepth(); i > mathStepsTreeRoot.getDepth() - printedNode.getDepth(); i--){
+        branch = branch + "--";
+      }
+      System.out.println(branch + printedNode);
     }
 
   }
@@ -161,7 +228,7 @@ public class TippaeTreeSandbox {
 
     TippaeTreeSandbox testingEnvironment = new TippaeTreeSandbox();
     testingEnvironment.readResource("../Tippae-Math-Truth.clj");
-
+    testingEnvironment.constructStepsTree();
 
   }
 
