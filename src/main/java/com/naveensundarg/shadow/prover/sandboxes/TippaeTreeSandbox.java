@@ -156,41 +156,47 @@ public class TippaeTreeSandbox {
 
     }
 
-    treePrinter(mathStepsTreeRoot);
+    //treePrinter(mathStepsTreeRoot);
 
   }
 
   public void insertStep(DefaultMutableTreeNode tNode, DefaultMutableTreeNode dNode){
+    System.out.println("The current tree before insertStep is called on term:\n" + tNode + "\nand definition:\n" + dNode + " is:");
+    treePrinter(mathStepsTreeRoot);
+
 
     if(mathStepsTreeRoot.getChildCount() == 0){ //If the tree is empty
       mathStepsTreeRoot.add(tNode); //Add the term node to the root
       tNode.add(dNode); //And have the definition node be it's child
-    }else if(!mathStepsTreeRoot.isNodeAncestor(tNode) && !mathStepsTreeRoot.isNodeAncestor(dNode)){ //If the tree does not contain the term node or the definition node but is not empty
+    }else if(!isADescendantByString(mathStepsTreeRoot, tNode) && !isADescendantByString(mathStepsTreeRoot, dNode)){ //If the tree does not contain the term node or the definition node but is not empty
       mathStepsTreeRoot.add(tNode); //Add the term node to the root
       tNode.add(dNode); //And have the definition node be it's child
-    }else if(mathStepsTreeRoot.isNodeAncestor(tNode) && !mathStepsTreeRoot.isNodeAncestor(dNode)){ //if the tree does have the term node but not the definition node
+    }else if(isADescendantByString(mathStepsTreeRoot, tNode) && (!isADescendantByString(mathStepsTreeRoot, dNode) || dNode.getParent() == mathStepsTreeRoot)){ //if the tree does have the term node but not the definition node
       tNode.add(dNode); //just add the definition as a child of the term
-    }else if(!mathStepsTreeRoot.isNodeAncestor(tNode) && mathStepsTreeRoot.isNodeAncestor(dNode)){ //if the tree does not that the term node but does have the definition node
+    }else if(!isADescendantByString(mathStepsTreeRoot, tNode)  && isADescendantByString(mathStepsTreeRoot, dNode)){ //if the tree does not that the term node but does have the definition node
       DefaultMutableTreeNode parentalNode = (DefaultMutableTreeNode) dNode.getParent(); //insert the term node in between the definition node and it's parent node
       parentalNode.add(tNode);
       dNode.setParent(tNode);
       tNode.add(dNode);
     }
 
+    System.out.println("The tree after insertStep as been called is: ");
+    treePrinter(mathStepsTreeRoot);
+
   }
 
-  public DefaultMutableTreeNode findNodeByString(DefaultMutableTreeNode searchedFor){
-    Enumeration searchEnum = mathStepsTreeRoot.depthFirstEnumeration();
-    DefaultMutableTreeNode answerNode = null;
-    String targetString = searchedFor.toString();
-    while(answerNode == null && searchEnum.hasMoreElements()){
+  public boolean isADescendantByString(DefaultMutableTreeNode ancester, DefaultMutableTreeNode descendant){
+    Enumeration searchEnum = ancester.depthFirstEnumeration();
+    String targetString = descendant.toString();
+    boolean answer = false;
+    while(answer == false && searchEnum.hasMoreElements()){
       DefaultMutableTreeNode testedNode = (DefaultMutableTreeNode) searchEnum.nextElement();
       String testedString = testedNode.toString();
       if(targetString.equals(testedString)){
-        answerNode = testedNode;
+        answer = true;
       }
     }
-    return answerNode;
+    return answer;
   }
 
   public void addSubDefinitionSteps(DefaultMutableTreeNode inputNode){
@@ -200,27 +206,34 @@ public class TippaeTreeSandbox {
         if(input.getArguments()[i].getArguments().length>0) {
           DefaultMutableTreeNode subDefNode = new DefaultMutableTreeNode(input.getArguments()[i]);
           addSubDefinitionSteps(subDefNode);
+          //treePrinter(mathStepsTreeRoot);
           insertStep(inputNode, subDefNode);
-          System.out.println("The node " + inputNode + "has been given child " + input.getArguments()[i]);
-          System.out.println("<<" + input.getArguments().length + ">>");
+          //System.out.println("The node " + inputNode + "has been given child " + input.getArguments()[i]);
+          //System.out.println("<<" + input.getArguments().length + ">>");
         }
       }
-
-
     }
   }
 
   public void treePrinter(DefaultMutableTreeNode node){
     Enumeration breathEnum = mathStepsTreeRoot.depthFirstEnumeration();
+    ArrayList<String> answerStack = new ArrayList<>();
 
     while(breathEnum.hasMoreElements()){
       DefaultMutableTreeNode printedNode = (DefaultMutableTreeNode) breathEnum.nextElement();
-      String branch = "";
-      for(int i = mathStepsTreeRoot.getDepth(); i > mathStepsTreeRoot.getDepth() - printedNode.getDepth(); i--){
+      String branch = "~";
+      for(int i = printedNode.getDepth(); i < mathStepsTreeRoot.getDepth(); i++){
         branch = branch + "--";
       }
-      System.out.println(branch + printedNode);
+      answerStack.add(branch + printedNode.toString());
+      //System.out.println(branch + printedNode);
     }
+
+    while(!answerStack.isEmpty()){
+      System.out.println(answerStack.remove(answerStack.size()-1));
+    }
+
+    System.out.println();
 
   }
 
