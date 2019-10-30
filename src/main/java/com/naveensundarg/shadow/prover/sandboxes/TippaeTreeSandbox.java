@@ -28,12 +28,20 @@ public class TippaeTreeSandbox {
   private Map<Value, Value> OptionToValidityMap = CollectionUtils.newMap();
   private Map<Value, Value> termToDefinitionMap = CollectionUtils.newMap();
   private DefaultMutableTreeNode mathStepsTreeRoot = new DefaultMutableTreeNode();
+  private Problem question;
+  private SnarkWrapperCustom prover;
+
+  public TippaeTreeSandbox(String fileLocation) throws Reader.ParsingException {
+    this.readResource(fileLocation);
+    prover = SnarkWrapperCustom.getInstance();
+  }
 
   public void readResource(String fileLocation) throws Reader.ParsingException {
 
     List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream(fileLocation));
 
     Problem p = tests.get(0);
+    question = p;
 
     Set<Formula> assumptions = p.getAssumptions();
 
@@ -43,7 +51,7 @@ public class TippaeTreeSandbox {
 
     for (Formula assumption: assumptions) {
 
-      System.out.println(assumption);
+//      System.out.println(assumption);
 
       for (Formula subAssumption : assumption.subFormulae()) {
 
@@ -63,18 +71,18 @@ public class TippaeTreeSandbox {
 
     }
 
-    System.out.println("Optionally Formula are: ");
+//    System.out.println("Optionally Formula are: ");
     for (Formula option: assumedOptionallyBranches){
-      System.out.println("     " + option);
+//      System.out.println("     " + option);
       //The command to print out the values that aren't variables
       Set<Value> attemptAndOption = option.valuesPresent().stream().filter(op -> !op.getName().startsWith("?")).collect(Collectors.toSet());
-      System.out.println("          " + attemptAndOption);
+//      System.out.println("          " + attemptAndOption);
 
       //The commands for collecting the Attempts and the associated Option
       Value att = attemptAndOption.stream().filter(part -> part.getName().endsWith("Attempt")).findFirst().get();
-      System.out.println("Attempt is     " + att);
+//      System.out.println("Attempt is     " + att);
       Value op = attemptAndOption.stream().filter(part -> !part.getName().endsWith("Attempt")).findFirst().get();
-      System.out.println("Option is      " + op);
+//      System.out.println("Option is      " + op);
 
       if(!attemptToOptionsMap.containsKey(att)){
         Set<Value> optionsSet = CollectionUtils.newEmptySet();
@@ -85,26 +93,26 @@ public class TippaeTreeSandbox {
       }
     }
 
-    System.out.println("Validity Formula are: ");
+//    System.out.println("Validity Formula are: ");
     for (Formula validity: assumedValidityDeclarations){
-      System.out.println("     " + validity);
+//      System.out.println("     " + validity);
       //The command to print out the values that aren't variables
       Set<Value> stepAndValidity = validity.valuesPresent().stream().filter(val -> !val.getName().startsWith("?")).collect(Collectors.toSet());
-      System.out.println("          " + stepAndValidity);
+//      System.out.println("          " + stepAndValidity);
 
       //The command to get the step and validity separately
       Value vali = stepAndValidity.stream().filter(val -> (val.getName().equalsIgnoreCase("Valid") || val.getName().equalsIgnoreCase("Invalid"))).findAny().get();
       Value stp = stepAndValidity.stream().filter(val -> !(val.getName().equalsIgnoreCase("Valid") || val.getName().equalsIgnoreCase("Invalid"))).findAny().get();
-      System.out.println("Validity       " + vali);
-      System.out.println("Step           " + stp);
+//      System.out.println("Validity       " + vali);
+//      System.out.println("Step           " + stp);
 
       OptionToValidityMap.put(stp, vali);
 
     }
 
-    System.out.println("Definition Formula are: ");
+//    System.out.println("Definition Formula are: ");
     for (Formula definition: assumedDefinitionDeclarations){
-      System.out.println("     " + definition);
+//      System.out.println("     " + definition);
       String stringForm = definition.toString();
       String firstName = stringForm.substring(9, stringForm.indexOf(" ", 9));
 
@@ -127,14 +135,14 @@ public class TippaeTreeSandbox {
       String secondName = stringForm.substring(indexOfSecondName, stringForm.indexOf(" ", indexOfSecondName));
       Value termVal = definition.valuesPresent().stream().filter(def -> def.getName().equals(firstName)).collect(Collectors.toSet()).iterator().next();
       Value defVal = definition.valuesPresent().stream().filter(def -> def.getName().equals(secondName)).collect(Collectors.toSet()).iterator().next();
-      System.out.println("          " + termVal);
-      System.out.println("          " + defVal);
+//      System.out.println("          " + termVal);
+//      System.out.println("          " + defVal);
       termToDefinitionMap.put(termVal, defVal);
     }
 
-    System.out.println("\n\n" + attemptToOptionsMap);
-    System.out.println("\n" + OptionToValidityMap);
-    System.out.println("\n" + termToDefinitionMap + "\n\n");
+//    System.out.println("\n\n" + attemptToOptionsMap);
+//    System.out.println("\n" + OptionToValidityMap);
+//    System.out.println("\n" + termToDefinitionMap + "\n\n");
 
 
 
@@ -160,9 +168,69 @@ public class TippaeTreeSandbox {
 
   }
 
+  public void constructStepsTreeByReasoning(){
+    Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = prover.proveAndGetMultipleBindings(question.getAssumptions(), question.getGoal(), question.getAnswerVariables().get());
+
+    System.out.println("\n\n" + answer.get().getRight());
+  }
+
+  public Optional<Pair<Justification, Set<Map<Variable, Value>>>> traverseOptionsByReasoning(String attemptFormulaString) throws Reader.ParsingException {
+
+    Formula attemptGoal = Reader.readFormulaFromString("" +
+      "(and\n" +
+      "            (Optionally " + attemptFormulaString + " ?option)\n" +
+      "            (Define ?option ?definition)\n" +
+      "            (Validity ?definition ?validity)\n" +
+      ")");
+
+    Variable option = new Variable("?option"); Variable definition = new Variable("?definition"); Variable validity = new Variable("?validity");
+    List<Variable> vars = CollectionUtils.newEmptyList();
+    vars.add(option); vars.add(definition); vars.add(validity);
+
+    Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = prover.proveAndGetMultipleBindings(question.getAssumptions(), attemptGoal, vars);
+    if(answer.isPresent()) {
+      System.out.println("Full answer is: ");
+      System.out.println(answer.get().getRight());
+      return answer;
+    }
+
+
+    attemptGoal = Reader.readFormulaFromString("" +
+      "(and\n" +
+      "            (Optionally " + attemptFormulaString + " ?option)\n" +
+      "            (Define ?option ?definition)\n" +
+      "            ;;(Validity ?definition ?validity)\n" +
+      ")");
+    vars.remove(validity);
+    answer = prover.proveAndGetMultipleBindings(question.getAssumptions(), attemptGoal, vars);
+    if(answer.isPresent()){
+      System.out.println("Answer without validity is: ");
+      System.out.println(answer.get().getRight());
+      return answer;
+    }
+
+
+    attemptGoal = Reader.readFormulaFromString("" +
+      "(and\n" +
+      "            (Optionally " + attemptFormulaString + " ?option)\n" +
+      "            (= 5 5)\n" +
+      "            ;;(Validity ?definition ?validity)\n" +
+      ")");
+    vars.remove(definition);
+    answer = prover.proveAndGetMultipleBindings(question.getAssumptions(), attemptGoal, vars);
+    if(answer.isPresent()){
+      System.out.println("Answer without definition or validity is: ");
+      System.out.println(answer.get().getRight());
+      return answer;
+    }else {
+      System.out.println("Could not find options.");
+      return null;
+    }
+  }
+
   public void insertStep(DefaultMutableTreeNode tNode, DefaultMutableTreeNode dNode){
-    System.out.println("The current tree before insertStep is called on term:\n" + tNode + "\nand definition:\n" + dNode + " is:");
-    treePrinter(mathStepsTreeRoot);
+//    System.out.println("The current tree before insertStep is called on term:\n" + tNode + "\nand definition:\n" + dNode + " is:");
+//    treePrinter(mathStepsTreeRoot);
 
 
     if(mathStepsTreeRoot.getChildCount() == 0){ //If the tree is empty
@@ -171,16 +239,21 @@ public class TippaeTreeSandbox {
     }else if(!isADescendantByString(mathStepsTreeRoot, tNode) && !isADescendantByString(mathStepsTreeRoot, dNode)){ //If the tree does not contain the term node or the definition node but is not empty
       mathStepsTreeRoot.add(tNode); //Add the term node to the root
       tNode.add(dNode); //And have the definition node be it's child
-    }else if(isADescendantByString(mathStepsTreeRoot, tNode) && (!isADescendantByString(mathStepsTreeRoot, dNode) || dNode.getParent() == mathStepsTreeRoot)){ //if the tree does have the term node but not the definition node
+    }else if(isADescendantByString(mathStepsTreeRoot, tNode) && ((!isADescendantByString(mathStepsTreeRoot, dNode)) || (dNode.getParent() == mathStepsTreeRoot))){ //if the tree does have the term node but not the definition node
       tNode.add(dNode); //just add the definition as a child of the term
     }else if(!isADescendantByString(mathStepsTreeRoot, tNode)  && isADescendantByString(mathStepsTreeRoot, dNode)){ //if the tree does not that the term node but does have the definition node
       DefaultMutableTreeNode parentalNode = (DefaultMutableTreeNode) dNode.getParent(); //insert the term node in between the definition node and it's parent node
       parentalNode.add(tNode);
       dNode.setParent(tNode);
       tNode.add(dNode);
+    }else if(isADescendantByString(mathStepsTreeRoot, tNode) && isADescendantByString(mathStepsTreeRoot, dNode)){
+      DefaultMutableTreeNode trueDNode = findADescendantByString(mathStepsTreeRoot, dNode);
+      DefaultMutableTreeNode trueTNode = findADescendantByString(mathStepsTreeRoot, tNode);
+      trueDNode.removeFromParent();
+      trueTNode.add(trueDNode);
     }
 
-    System.out.println("The tree after insertStep as been called is: ");
+//    System.out.println("The tree after insertStep as been called is: ");
     treePrinter(mathStepsTreeRoot);
 
   }
@@ -199,15 +272,32 @@ public class TippaeTreeSandbox {
     return answer;
   }
 
+  public DefaultMutableTreeNode findADescendantByString(DefaultMutableTreeNode ancester, DefaultMutableTreeNode descendant){
+    Enumeration searchEnum = ancester.depthFirstEnumeration();
+    String targetString = descendant.toString();
+    DefaultMutableTreeNode answer = null;
+    while(answer == null && searchEnum.hasMoreElements()){
+      DefaultMutableTreeNode testedNode = (DefaultMutableTreeNode) searchEnum.nextElement();
+      String testedString = testedNode.toString();
+      if(targetString.equals(testedString)){
+        answer = testedNode;
+      }
+    }
+    return answer;
+  }
+
   public void addSubDefinitionSteps(DefaultMutableTreeNode inputNode){
     Value input = (Value) inputNode.getUserObject();
     if(input != null && input.getArguments().length > 0) {
       for (int i = 0; i < input.getArguments().length; i++){
         if(input.getArguments()[i].getArguments().length>0) {
           DefaultMutableTreeNode subDefNode = new DefaultMutableTreeNode(input.getArguments()[i]);
+
+          insertStep(inputNode, subDefNode);
+
           addSubDefinitionSteps(subDefNode);
           //treePrinter(mathStepsTreeRoot);
-          insertStep(inputNode, subDefNode);
+
           //System.out.println("The node " + inputNode + "has been given child " + input.getArguments()[i]);
           //System.out.println("<<" + input.getArguments().length + ">>");
         }
@@ -215,9 +305,10 @@ public class TippaeTreeSandbox {
     }
   }
 
-  public void treePrinter(DefaultMutableTreeNode node){
+  public String treePrinter(DefaultMutableTreeNode node){
     Enumeration breathEnum = mathStepsTreeRoot.depthFirstEnumeration();
     ArrayList<String> answerStack = new ArrayList<>();
+    String answerBuffer = "";
 
     while(breathEnum.hasMoreElements()){
       DefaultMutableTreeNode printedNode = (DefaultMutableTreeNode) breathEnum.nextElement();
@@ -230,19 +321,24 @@ public class TippaeTreeSandbox {
     }
 
     while(!answerStack.isEmpty()){
-      System.out.println(answerStack.remove(answerStack.size()-1));
+      String stk = answerStack.remove(answerStack.size()-1);
+      answerBuffer = answerBuffer + stk + "\n";
+      System.out.println(stk);
     }
 
     System.out.println();
+    return answerBuffer;
 
   }
 
   public static void main(String[] args) throws Exception {
 
-    TippaeTreeSandbox testingEnvironment = new TippaeTreeSandbox();
-    testingEnvironment.readResource("../Tippae-Math-Truth.clj");
-    testingEnvironment.constructStepsTree();
-
+    TippaeTreeSandbox testingEnvironment = new TippaeTreeSandbox("../Tippae-Math-Truth.clj");
+    //testingEnvironment.constructStepsTree();
+    testingEnvironment.constructStepsTreeByReasoning();
+    testingEnvironment.traverseOptionsByReasoning("(TwoByOneMultAttempt 1 5 5)");
   }
+
+
 
 }

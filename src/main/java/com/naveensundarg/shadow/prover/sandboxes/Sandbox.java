@@ -25,13 +25,13 @@ public class Sandbox {
 
 
 
-    public static void main1(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
 
 
-        List<Problem> tests = ProblemReader.readFrom(new FileInputStream("./src/main/resources/com/naveensundarg/shadow/prover/core/ccprovers/sandbox.clj"));
+        List<Problem> tests = ProblemReader.readFrom(new FileInputStream("C:\\Users\\John\\Documents\\GitHub\\prover\\src\\main\\resources\\com\\naveensundarg\\shadow\\prover\\teleportation_simulation.clj"));
 
 
-        Problem p = (tests.get(0));
+        Problem p = (tests.get(1));
 
 
         CognitiveCalculusProver cognitiveCalculusProver = new CognitiveCalculusProver();
@@ -52,7 +52,7 @@ public class Sandbox {
     }
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main2(String[] args) throws Exception {
 
 
         SecondOrderProver secondOrderProver = new SecondOrderProver();

@@ -253,7 +253,7 @@
 
   }
 
- :answer-variables [?x]
+ :answer-variables [?x, ?valid]
 
  :answers-expected ( )
 
@@ -268,7 +268,7 @@
 
  :goal
         (and
-            (Validity ?x valid)
+            (Validity ?x ?valid)
             (Optionally (TwoByOneMultAttempt 1 5 5) ?x) ;;This represents the questions being analysed and is not optional
         )
 
