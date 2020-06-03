@@ -1,6 +1,7 @@
 package com.naveensundarg.shadow.prover.sandboxes;
 
 import com.naveensundarg.shadow.prover.core.*;
+import com.naveensundarg.shadow.prover.core.ccprovers.CognitiveCalculusProver;
 import com.naveensundarg.shadow.prover.core.ccprovers.SecondOrderProver;
 import com.naveensundarg.shadow.prover.core.proof.Justification;
 import com.naveensundarg.shadow.prover.representations.formula.Formula;
@@ -49,7 +50,7 @@ public class TippaeSandbox {
 
                 Problem p = (tests.get(i));
 
-                SnarkWrapperCustom cognitiveCalculusProver = SnarkWrapperCustom.getInstance();
+                CognitiveCalculusProver cognitiveCalculusProver = new CognitiveCalculusProver();
 
                 if (p.getAnswerVariables().isPresent()) {
 
