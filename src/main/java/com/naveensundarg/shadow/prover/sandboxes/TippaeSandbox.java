@@ -21,7 +21,7 @@ import static us.bpsm.edn.Keyword.newKeyword;
  */
 public class TippaeSandbox {
 
-    private static SnarkWrapperCustom snarkProver = SnarkWrapperCustom.getInstance();
+//    private static SnarkWrapperCustom snarkProver = SnarkWrapperCustom.getInstance();
 
     public static void main(String[] args) throws Exception {
 
@@ -44,7 +44,7 @@ public class TippaeSandbox {
 
 
 
-        }else if(false){
+        }else if(true){
 
             List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
 
@@ -99,10 +99,10 @@ public class TippaeSandbox {
             //Loading the information file for assumptions and solving question.
             List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
             Problem p = tests.get(0);
-            Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = snarkProver.proveAndGetMultipleBindings(p.getAssumptions(), p.getGoal(), p.getAnswerVariables().get());
+//            Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = snarkProver.proveAndGetMultipleBindings(p.getAssumptions(), p.getGoal(), p.getAnswerVariables().get());
 
             //General debugging information
-            System.out.println("\n\n" + answer.get().getRight());
+//            System.out.println("\n\n" + answer.get().getRight());
 
             //Check if intermediate steps are DEFINED in the truth file as something else.
 
@@ -123,7 +123,7 @@ public class TippaeSandbox {
 
         System.out.println(defGoal);
 
-        Optional<Pair<Justification, Set<Map<Variable, Value>>>> ans = snarkProver.proveAndGetMultipleBindings(prob.getAssumptions(), defGoal, vars);
+//        Optional<Pair<Justification, Set<Map<Variable, Value>>>> ans = snarkProver.proveAndGetMultipleBindings(prob.getAssumptions(), defGoal, vars);
 
         return null;
     }
