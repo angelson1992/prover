@@ -21,6 +21,8 @@ import static us.bpsm.edn.Keyword.newKeyword;
  */
 public class TippaeSandbox {
 
+    private static SnarkWrapperCustom snarkProver = SnarkWrapperCustom.getInstance();
+
     public static void main(String[] args) throws Exception {
 
         if(false){
@@ -42,7 +44,7 @@ public class TippaeSandbox {
 
 
 
-        }else if(true){
+        }else if(false){
 
             List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
 
@@ -87,12 +89,58 @@ public class TippaeSandbox {
 
             }
         }else{
-            File outputFile = new File(TippaeSandbox.class.getResource("../GeneratedTippaeDebug.clj").getPath());
-            PrintWriter writer = new PrintWriter(outputFile);
+//            File outputFile = new File(TippaeSandbox.class.getResource("../GeneratedTippaeDebug.clj").getPath());
+//            PrintWriter writer = new PrintWriter(outputFile);
+//
+//            writer.flush();
+//            writer.close();
 
-            writer.flush();
-            writer.close();
+
+            //Loading the information file for assumptions and solving question.
+            List<Problem> tests = ProblemReader.readFrom(TippaeSandbox.class.getResourceAsStream("../Tippae-debug.clj"));
+            Problem p = tests.get(0);
+            Optional<Pair<Justification, Set<Map<Variable, Value>>>> answer = snarkProver.proveAndGetMultipleBindings(p.getAssumptions(), p.getGoal(), p.getAnswerVariables().get());
+
+            //General debugging information
+            System.out.println("\n\n" + answer.get().getRight());
+
+            //Check if intermediate steps are DEFINED in the truth file as something else.
+
+
+
         }
+    }
+
+    private static Value getDefinition(Problem prob, Variable inputVar, Value input) throws Reader.ParsingException {
+
+        List<Variable> vars = prob.getAnswerVariables().get();
+        Variable var = vars.get(0);
+
+        Formula defGoal = Reader.readFormulaFromString( "(Define" +
+                                                        "   " + input.toString() +
+                                                        "   " + var.toString() +
+                                                        ")");
+
+        System.out.println(defGoal);
+
+        Optional<Pair<Justification, Set<Map<Variable, Value>>>> ans = snarkProver.proveAndGetMultipleBindings(prob.getAssumptions(), defGoal, vars);
+
+        return null;
+    }
+
+    //A function to convert a simplest form S-formatted math question into
+    private static Formula questionToFormula(String question){
+
+        if(question.startsWith("(")){question = question.substring(1);}
+        if(question.endsWith(")")){question = question.substring(0, question.length()-1);}
+        String[] splitString = question.split(" ");
+        for (int i = 0; i < splitString.length; i++) {
+            System.out.print(splitString[i] + ",");
+        }
+
+        //TODO as I've just realized that this is non-critical
+
+        return null;
     }
 
     private static String numToSuccessor(int num){
